@@ -1285,6 +1285,7 @@
             <a href="#favorites" class="nav-link" data-page="favorites"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Favorites</a>
         </nav>
         <div style="display:flex; gap: 0.75rem; align-items: center;">
+            <div class="active-users-badge" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.3rem 0.75rem; background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.2); color:var(--success); border-radius:9999px; font-size:0.78rem; font-weight:600;"><span style="width:7px; height:7px; background:var(--success); border-radius:50%; display:inline-block; box-shadow:0 0 8px var(--success);"></span> <span id="activeUserCount">3</span> Active</div>
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
                 <div class="theme-icon-wrapper">
                     <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -1328,6 +1329,10 @@
                 <div class="stat-card">
                     <div class="stat-number">...</div>
                     <div class="text-muted">Notes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">...</div>
+                    <div class="text-muted">Contributors</div>
                 </div>
             </section>
 
@@ -2019,8 +2024,11 @@
             const cards = document.querySelectorAll('.stat-number');
             cards[0].innerText = CURRICULUM.length;
             cards[1].innerText = approvedPapers.filter(p => p.type === 'Question' || !p.type).length;
-            cards[2].innerText = approvedPapers.filter(p => p.solutionUrl).length;
+            cards[2].innerText = approvedPapers.filter(p => p.solutionUrl || p.solutionPdfUrl).length;
             cards[3].innerText = approvedPapers.filter(p => p.type === 'Notes').length;
+            
+            const uniqueGmails = new Set(approvedPapers.map(p => (p.submitterEmail || p.contactEmail || '').toLowerCase().trim()).filter(e => e.includes('@'))).size;
+            if (cards[4]) cards[4].innerText = uniqueGmails || (approvedPapers.length > 0 ? 1 : 0);
 
             // Trimesters
             const trimCont = document.getElementById('trimesterList');
