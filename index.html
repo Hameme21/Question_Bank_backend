@@ -501,9 +501,14 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1.5rem;
             margin-bottom: 3rem;
+        }
+
+        .stat-card-contributors {
+            background: linear-gradient(135deg, rgba(243, 112, 33, 0.12), rgba(255, 159, 69, 0.05));
+            border: 1px solid var(--accent-glow);
         }
         
         .stat-card {
@@ -1098,6 +1103,11 @@
                 grid-template-columns: 1fr 1fr;
                 gap: 0.75rem;
             }
+            .stat-card-contributors {
+                grid-column: 1 / -1;
+                width: 100%;
+                text-align: center;
+            }
             .stat-card {
                 padding: 1.25rem 1rem;
             }
@@ -1229,6 +1239,11 @@
                 grid-template-columns: 1fr 1fr;
                 gap: 0.5rem;
             }
+            .stat-card-contributors {
+                grid-column: 1 / -1;
+                width: 100%;
+                text-align: center;
+            }
             .stat-card {
                 padding: 1rem 0.75rem;
             }
@@ -1314,25 +1329,25 @@
             </section>
 
             <section class="stats-grid" id="dashboardStats">
+                <div class="stat-card stat-card-contributors">
+                    <div class="stat-number" id="stat-contributors">...</div>
+                    <div class="text-muted">Contributors</div>
+                </div>
                 <div class="stat-card">
-                    <div class="stat-number">...</div>
+                    <div class="stat-number" id="stat-courses">...</div>
                     <div class="text-muted">Courses</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">...</div>
+                    <div class="stat-number" id="stat-questions">...</div>
                     <div class="text-muted">Questions</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">...</div>
+                    <div class="stat-number" id="stat-solutions">...</div>
                     <div class="text-muted">Solutions</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">...</div>
+                    <div class="stat-number" id="stat-notes">...</div>
                     <div class="text-muted">Notes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">...</div>
-                    <div class="text-muted">Contributors</div>
                 </div>
             </section>
 
@@ -2021,14 +2036,14 @@
 
         function renderDashboard() {
             // Stats
-            const cards = document.querySelectorAll('.stat-number');
-            cards[0].innerText = CURRICULUM.length;
-            cards[1].innerText = approvedPapers.filter(p => p.type === 'Question' || !p.type).length;
-            cards[2].innerText = approvedPapers.filter(p => p.solutionUrl || p.solutionPdfUrl).length;
-            cards[3].innerText = approvedPapers.filter(p => p.type === 'Notes').length;
+            document.getElementById('stat-courses').innerText = CURRICULUM.length;
+            document.getElementById('stat-questions').innerText = approvedPapers.filter(p => p.type === 'Question' || !p.type).length;
+            document.getElementById('stat-solutions').innerText = approvedPapers.filter(p => p.solutionUrl || p.solutionPdfUrl).length;
+            document.getElementById('stat-notes').innerText = approvedPapers.filter(p => p.type === 'Notes').length;
             
             const uniqueGmails = new Set(approvedPapers.map(p => (p.submitterEmail || p.contactEmail || '').toLowerCase().trim()).filter(e => e.includes('@'))).size;
-            if (cards[4]) cards[4].innerText = uniqueGmails || (approvedPapers.length > 0 ? 1 : 0);
+            const contribEl = document.getElementById('stat-contributors');
+            if (contribEl) contribEl.innerText = uniqueGmails || (approvedPapers.length > 0 ? 1 : 0);
 
             // Trimesters
             const trimCont = document.getElementById('trimesterList');
@@ -2641,9 +2656,52 @@
             document.getElementById('navLinks').classList.toggle('active');
         });
 
+        // Real-time Live Active Users Presence Tracker
+        const PRESENCE_COLLECTION = 'presences';
+        const presenceSessionId = sessionStorage.getItem('qb_presence_id') || ('pres_' + Math.random().toString(36).substring(2, 10));
+        sessionStorage.setItem('qb_presence_id', presenceSessionId);
+
+        async function reportPresence() {
+            try {
+                const docRef = doc(db, PRESENCE_COLLECTION, presenceSessionId);
+                await setDoc(docRef, {
+                    lastSeen: serverTimestamp(),
+                    timestamp: Date.now()
+                }, { merge: true });
+            } catch (e) {
+                console.warn('Presence report skipped:', e);
+            }
+        }
+
+        function listenToLiveActiveUsers() {
+            try {
+                const presRef = collection(db, PRESENCE_COLLECTION);
+                onSnapshot(presRef, (snapshot) => {
+                    const now = Date.now();
+                    let activeCount = 0;
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        const ts = data.timestamp || (data.lastSeen && data.lastSeen.seconds ? data.lastSeen.seconds * 1000 : 0);
+                        if (ts && (now - ts) < 45000) {
+                            activeCount++;
+                        }
+                    });
+                    const countEl = document.getElementById('activeUserCount');
+                    if (countEl) countEl.textContent = Math.max(1, activeCount);
+                }, (err) => {
+                    console.warn('Presence snapshot error:', err);
+                });
+            } catch (e) {
+                console.warn('Presence listener setup error:', e);
+            }
+        }
+
         // Init
         initTheme();
         listenForApprovedPapers();
+        reportPresence();
+        setInterval(reportPresence, 15000);
+        listenToLiveActiveUsers();
         handleRouteChange();
 
         // Hide loader after app initializes
