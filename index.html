@@ -2572,26 +2572,5 @@
             <span>Favorites</span>
         </a>
     </nav>
-    <script>
-        // Pin the mobile bottom nav to the true visible viewport bottom.
-        // Fixes Android Chrome shifting fixed-position elements when the
-        // address bar collapses/expands during scroll (only noticeable on
-        // pages tall enough to scroll, like Courses).
-        (function () {
-            const nav = document.getElementById('mobileBottomNav');
-            if (!nav || !window.visualViewport) return;
-
-            function pinNav() {
-                const vv = window.visualViewport;
-                const offsetBottom = window.innerHeight - (vv.height + vv.offsetTop);
-                nav.style.transform = 'translateZ(0) translateY(-' + Math.max(0, offsetBottom) + 'px)';
-            }
-
-            window.visualViewport.addEventListener('resize', pinNav);
-            window.visualViewport.addEventListener('scroll', pinNav);
-            window.addEventListener('scroll', pinNav);
-            pinNav();
-        })();
-    </script>
 </body>
 </html>
