@@ -920,10 +920,9 @@
             left: 0;
             right: 0;
             margin: 0 auto;
-            width: max-content;
+            width: 220px;
+            max-width: calc(100vw - 2rem);
             z-index: 9999;
-            transform: translateZ(0);
-            will-change: transform;
             background: var(--glass-bg);
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -934,6 +933,69 @@
             gap: 0.5rem;
             align-items: center;
             justify-content: center;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+
+        .courses-header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .courses-controls {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+            width: auto;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .courses-search-input {
+            padding-left: 2.75rem !important;
+            width: 260px;
+            max-width: 100%;
+        }
+
+        .courses-filter-select {
+            width: 170px;
+            max-width: 100%;
+        }
+
+        .course-detail-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .course-filter-select {
+            width: 200px;
+            max-width: 100%;
         }
 
         .bottom-nav-item {
@@ -1052,9 +1114,36 @@
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
-            .course-header {
-                padding: 1.5rem 1rem;
-                border-radius: var(--radius-md);
+            .courses-header-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            .courses-controls {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.75rem;
+            }
+            .search-input-wrapper {
+                width: 100%;
+                min-width: 0;
+            }
+            .courses-search-input {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .courses-filter-select {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .course-detail-filters {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .course-filter-select {
+                width: 100% !important;
+                max-width: 100% !important;
             }
             .resource-card {
                 flex-direction: column;
@@ -1265,11 +1354,17 @@
 
         <!-- Courses Page -->
         <div id="page-courses" class="page">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                <h2>All Courses</h2>
-                <div style="display:flex; gap: 1rem;">
-                    <input type="text" id="coursesSearch" class="input-control" placeholder="Search courses..." style="width:250px;">
-                    <select id="coursesTrimesterFilter" class="input-control" style="width: auto;">
+            <div class="courses-header-wrapper">
+                <div>
+                    <h2>All Courses</h2>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-top: 0.2rem;">Explore all UIU CSE curriculum courses</p>
+                </div>
+                <div class="courses-controls">
+                    <div class="search-input-wrapper">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-input-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="coursesSearch" class="input-control courses-search-input" placeholder="Search course name or code...">
+                    </div>
+                    <select id="coursesTrimesterFilter" class="input-control courses-filter-select">
                         <option value="all">All Trimesters</option>
                         <!-- Populated via JS -->
                     </select>
@@ -1303,11 +1398,11 @@
                 <!-- Populated via JS -->
             </div>
 
-            <div style="display:flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-                <select id="courseSemesterFilter" class="input-control" style="width:200px;">
+            <div class="course-detail-filters">
+                <select id="courseSemesterFilter" class="input-control course-filter-select">
                     <option value="all">All Semesters</option>
                 </select>
-                <select id="courseExamTypeFilter" class="input-control" style="width:200px;">
+                <select id="courseExamTypeFilter" class="input-control course-filter-select">
                     <option value="all">All Exam Types</option>
                     <option value="Midterm">Midterm</option>
                     <option value="Final">Final</option>
