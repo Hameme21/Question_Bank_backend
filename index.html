@@ -2001,7 +2001,7 @@
                         </div>
                         ${topicStr}
                         <div class="resource-meta">
-                            <span>By ${paper.submitterName || 'Anonymous'}</span>
+                            <span>By ${paper.submitterName || 'Anonymous'} ${(paper.submitterEmail || paper.contactEmail) ? `<a href="mailto:${paper.submitterEmail || paper.contactEmail}" style="color:var(--orange); font-size:0.85rem; font-weight:500; margin-left:0.35rem;" title="Email Uploader">(${paper.submitterEmail || paper.contactEmail})</a>` : ''}</span>
                         </div>
                     </div>
                     <div class="resource-actions">
