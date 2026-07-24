@@ -671,7 +671,7 @@ const server = http.createServer((request, response) => {
             <div><strong>Backend:</strong> https://question-bank-x5pu.onrender.com</div>
             <div><strong>Frontend:</strong> https://uiu-question-bank.vercel.app/</div>
         </div>
-        <a href="https://uiu-question-bank.vercel.app/#upload" class="btn">Go to Upload Page 🚀</a>
+        <a href="https://uiu-question-bank.vercel.app/" class="btn">Go to QB Page 🚀</a>
     </div>
 </body>
 </html>`;
