@@ -3,7 +3,7 @@
 The API server that powers the [UIU Question Bank](https://github.com/Hameme21/UIU_Question_Bank) frontend. It handles signed file uploads, Firebase-authenticated admin actions, and email notifications for student submissions.
 
 **Live:** [`question-bank-x5pu.onrender.com`](https://question-bank-x5pu.onrender.com)
-**Frontend:** [`question-bank-orpin-psi.vercel.app`](https://question-bank-orpin-psi.vercel.app/)
+**Frontend:** [UIU CSE Question Bank](https://question-bank-orpin-psi.vercel.app/)
 
 ## What it does
 
