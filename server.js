@@ -228,7 +228,7 @@ async function handleHealth(request, response) {
         cloudinaryConfigured: Boolean(cloudinaryApiKey && cloudinaryApiSecret),
         cloudName: cloudinaryCloudName,
         uploadFolder: cloudinaryUploadFolder,
-        frontendUrl: 'https://question-bank-orpin-psi.vercel.app/'
+        frontendUrl: 'https://uiu-question-bank.vercel.app/'
     }, getRequestOrigin(request));
 }
 
@@ -709,9 +709,9 @@ const server = http.createServer((request, response) => {
         <div class="info-box">
             <div><strong>Status:</strong> 200 OK (Server is Running)</div>
             <div><strong>Backend:</strong> https://question-bank-x5pu.onrender.com</div>
-            <div><strong>Frontend:</strong> https://question-bank-orpin-psi.vercel.app/</div>
+            <div><strong>Frontend:</strong> https://uiu-question-bank.vercel.app/</div>
         </div>
-        <a href="https://question-bank-orpin-psi.vercel.app/#upload" class="btn">Go to Upload Page 🚀</a>
+        <a href="https://uiu-question-bank.vercel.app/#upload" class="btn">Go to Upload Page 🚀</a>
     </div>
 </body>
 </html>`;
