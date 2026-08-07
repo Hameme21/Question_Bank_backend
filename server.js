@@ -19,7 +19,7 @@ const smtpUser = process.env.SMTP_USER || '';
 const smtpPass = process.env.SMTP_PASS || ''; 
 const emailFrom = process.env.EMAIL_FROM || 'UIU Toolkits <noreply@uiu-toolkits.com>';
 
-const adminEmails = (process.env.ADMIN_EMAILS || 'ahamim2510370@bscse.uiu.ac.bd')
+const adminEmails = (process.env.ADMIN_EMAILS || 'hamimasir5@gmail.com,ahamim2510370@bscse.uiu.ac.bd')
     .split(',')
     .map(email => email.trim().toLowerCase())
     .filter(Boolean);
