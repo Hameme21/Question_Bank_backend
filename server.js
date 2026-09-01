@@ -123,7 +123,7 @@ function isValidContactEmail(value) {
 }
 
 function isValidAssetType(value) {
-    return ['question', 'solution', 'note'].includes(value);
+    return ['question', 'solution', 'note', 'lab', 'material'].includes(value);
 }
 
 function sanitizeContextValue(value) {
