@@ -467,6 +467,9 @@ async function handleQuestionsSubmit(request, response) {
         const noteAsset = body.noteAsset || null;
         const materialAssets = normalizeMaterialAssets(body.materialAssets);
 
+        const isLab = Boolean(body.isLab || body.credits === 1 || Number(body.credits) === 1);
+        const credits = body.credits ? Number(body.credits) : (isLab ? 1 : 3);
+
         if (!isValidContactEmail(submitterEmail)) {
             sendJson(response, 400, { error: 'A valid contact email is required.' }, requestOrigin);
             return;
@@ -474,6 +477,11 @@ async function handleQuestionsSubmit(request, response) {
 
         if (!courseCode || !courseName || !topic) {
             sendJson(response, 400, { error: 'courseCode, courseName, and topic are required.' }, requestOrigin);
+            return;
+        }
+
+        if (isLab && !facultyName && !facultyId) {
+            sendJson(response, 400, { error: 'Faculty selection is strictly required for Lab courses.' }, requestOrigin);
             return;
         }
 
@@ -511,6 +519,8 @@ async function handleQuestionsSubmit(request, response) {
                 title: `${courseCode} - ${courseName} ${topic}`,
                 courseCode,
                 courseName,
+                credits,
+                isLab,
                 topic,
                 trimester,
                 examType,
