@@ -459,6 +459,9 @@ async function handleQuestionsSubmit(request, response) {
         const topic = normalizeText(body.topic);
         const trimester = normalizeText(body.trimester);
         const examType = normalizeText(body.examType);
+        const facultyId = body.facultyId ? Number(body.facultyId) : null;
+        const facultyName = normalizeText(body.facultyName);
+        const facultyCode = normalizeText(body.facultyCode);
         const questionAsset = body.questionAsset || {};
         const solutionAsset = body.solutionAsset || null;
         const noteAsset = body.noteAsset || null;
@@ -491,6 +494,16 @@ async function handleQuestionsSubmit(request, response) {
         const primarySolution = normalizedLegacyAssets.find(asset => asset.assetType === 'solution') || null;
         const primaryNote = normalizedLegacyAssets.find(asset => asset.assetType === 'note') || null;
 
+        const rawTokenString = `${courseCode} ${courseName} ${topic} ${facultyName} ${facultyCode}`;
+        const searchTokens = [...new Set(
+            rawTokenString
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .split(/\s+/)
+                .map(t => t.trim())
+                .filter(Boolean)
+        )];
+
         sendJson(response, 200, {
             success: true,
             message: 'Question-bank metadata validated. Save this submission to Firestore from the client.',
@@ -501,6 +514,10 @@ async function handleQuestionsSubmit(request, response) {
                 topic,
                 trimester,
                 examType,
+                facultyId,
+                facultyName,
+                facultyCode,
+                searchTokens,
                 submitterName,
                 submitterEmail,
                 status: 'pending',
@@ -639,8 +656,66 @@ async function handlePresenceHeartbeat(request, response) {
     sendJson(response, 200, { ok: true, activeUsers: liveCount }, requestOrigin);
 }
 
+async function handleFacultiesList(request, response) {
+    const requestOrigin = getRequestOrigin(request);
+    try {
+        const filePath = path.join(rootDir, 'faculties.json');
+        if (!fs.existsSync(filePath)) {
+            sendJson(response, 200, [], requestOrigin);
+            return;
+        }
+        const rawData = fs.readFileSync(filePath, 'utf8');
+        const faculties = JSON.parse(rawData);
+        sendJson(response, 200, faculties, requestOrigin);
+    } catch (error) {
+        console.error('Failed to read faculties.json:', error);
+        sendJson(response, 500, { error: 'Failed to retrieve faculty members.' }, requestOrigin);
+    }
+}
+
+async function handleFacultiesSync(request, response) {
+    if (request.method !== 'POST') {
+        sendJson(response, 405, { error: 'Method not allowed.' }, getRequestOrigin(request));
+        return;
+    }
+
+    const requestOrigin = getRequestOrigin(request);
+    try {
+        await verifyAdminToken(getBearerToken(request));
+        const body = await readJsonBody(request);
+        const facultiesList = Array.isArray(body) ? body : (body.faculties || []);
+
+        if (!Array.isArray(facultiesList) || facultiesList.length === 0) {
+            sendJson(response, 400, { error: 'A non-empty faculties array is required.' }, requestOrigin);
+            return;
+        }
+
+        const sanitized = facultiesList.map(item => ({
+            id: Number(item.id || item.facultyId),
+            name: String(item.name || item.facultyName || '').trim(),
+            code: String(item.code || item.facultyCode || '').trim()
+        })).filter(item => item.id && item.name);
+
+        const filePath = path.join(rootDir, 'faculties.json');
+        fs.writeFileSync(filePath, JSON.stringify(sanitized, null, 2), 'utf8');
+
+        sendJson(response, 200, {
+            success: true,
+            message: `Successfully synced ${sanitized.length} faculty members.`,
+            count: sanitized.length
+        }, requestOrigin);
+    } catch (error) {
+        console.error('Faculties sync failed:', error);
+        sendJson(response, error.statusCode || 500, {
+            error: error.message || 'Faculties sync failed.'
+        }, requestOrigin);
+    }
+}
+
 const apiRoutes = {
     '/api/health': handleHealth,
+    '/api/faculties': handleFacultiesList,
+    '/api/faculties/sync': handleFacultiesSync,
     '/api/presence/heartbeat': handlePresenceHeartbeat,
     '/api/presence/active': handlePresenceHeartbeat,
     '/api/cloudinary/config': handleCloudinaryConfig,
@@ -665,7 +740,7 @@ const server = http.createServer((request, response) => {
     const routeHandler = apiRoutes[url.pathname];
 
     if (routeHandler) {
-        if (request.method === 'GET' && url.pathname !== '/api/health' && url.pathname !== '/api/cloudinary/config' && !url.pathname.startsWith('/api/presence/')) {
+        if (request.method === 'GET' && url.pathname !== '/api/health' && url.pathname !== '/api/faculties' && url.pathname !== '/api/cloudinary/config' && !url.pathname.startsWith('/api/presence/')) {
             sendJson(response, 405, { error: 'Method not allowed.' }, requestOrigin);
             return;
         }
